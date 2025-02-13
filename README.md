@@ -70,7 +70,7 @@ This repository contains a CloudFormation template that deploys a serverless sol
   - Separating operational logs in a dedicated bucket provides a basis for future anomaly detection or auditing.
 - **Recover (RC)**:  
   - Using CloudFormation (IaC) allows quick environment rebuilds in case of incidents or misconfigurations.
-- For Aditional info see  
+- For Aditional info see NIST-Details.md  
 ---
 
 Enjoy automating your stock data collection with AWS!

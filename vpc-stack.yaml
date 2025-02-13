@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to set up an AWS Lambda function for retrieving stock prices and storing logs in S3.
+
+Resources:
+
+  # --- Primary S3 Bucket for Stock Data ---
+  StockDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "magnificent7-stock-data-${AWS::AccountId}"
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteAfter30Days
+            Status: Enabled
+            ExpirationInDays: 30
+
+  # --- Secondary S3 Bucket for Logs ---
+  LogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "magnificent7-logs-${AWS::AccountId}"
+
+  # --- IAM Role for Lambda ---
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaStockDataRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource:
+                  - !Sub "arn:aws:s3:::magnificent7-stock-data/*"
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:aws:s3:::magnificent7-logs/*"
+        - PolicyName: SSMParameterAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/STOCK_API_KEY"
+
+  # --- Lambda Function ---
+  StockLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: FetchMagnificent7StockPrices
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.8
+      Handler: index.lambda_handler
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import requests
+          import os
+          import datetime
+
+          s3_client = boto3.client('s3')
+          ssm_client = boto3.client('ssm')
+          STOCKS = ["AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA"]
+          API_URL = "https://api.stockdata.org/v1/data/quote"
+
+          def get_api_key():
+              response = ssm_client.get_parameter(Name="STOCK_API_KEY", WithDecryption=True)
+              return response['Parameter']['Value']
+
+          def fetch_stock_prices():
+              API_KEY = get_api_key()
+              params = {"symbols": ",".join(STOCKS), "api_token": API_KEY}
+              response = requests.get(API_URL, params=params)
+              if response.status_code == 200:
+                  return response.json()
+              return None
+
+          def lambda_handler(event, context):
+              stock_data = fetch_stock_prices()
+              timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+              filename = f"stock_prices_{timestamp}.json"
+
+              if stock_data:
+                  s3_client.put_object(
+                      Bucket="magnificent7-stock-data",
+                      Key=filename,
+                      Body=json.dumps(stock_data),
+                      ContentType="application/json"
+                  )
+
+                  log_data = {"timestamp": timestamp, "status": "Success", "file": filename}
+                  log_filename = f"log_{timestamp}.json"
+                  s3_client.put_object(
+                      Bucket="magnificent7-logs",
+                      Key=log_filename,
+                      Body=json.dumps(log_data),
+                      ContentType="application/json"
+                  )
+
+                  return {"statusCode": 200, "body": "Stock data uploaded successfully."}
+              else:
+                  return {"statusCode": 500, "body": "Failed to fetch stock data."}
+
+  # --- SSM Parameter for API Key ---
+  StockApiKey:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "STOCK_API_KEY"
+      Type: "String"
+      Value: "wlM510gWk184PYRzgYRBRBhixQs5jeNKDK13pOB3"
+
+  # --- CloudWatch Event to Trigger Lambda Every 6 Hours ---
+  StockDataEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: StockDataLambdaSchedule
+      ScheduleExpression: "cron(0 */6 * * ? *)"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt StockLambdaFunction.Arn
+          Id: "StockDataLambdaTarget"
+
+  # --- Permission for CloudWatch to Invoke Lambda ---
+  PermissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref StockLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt StockDataEventRule.Arn
+
+Outputs:
+  StockDataBucket:
+    Description: "S3 Bucket for stock data"
+    Value: !Ref StockDataBucket
+
+  LogBucket:
+    Description: "S3 Bucket for log storage"
+    Value: !Ref LogBucket
+
+  LambdaFunction:
+    Description: "Lambda function for fetching stock prices"
+    Value: !Ref StockLambdaFunction
+
+  IAMRole:
+    Description: "IAM Role assigned to Lambda"
+    Value: !Ref LambdaExecutionRole
+
+  SSMParameter:
+    Description: "SSM Parameter storing the API Key"
+    Value: !Ref StockApiKey

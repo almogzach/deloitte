@@ -60,30 +60,25 @@ This repository contains a CloudFormation template that deploys a serverless sol
    - Users assigned to the AuditorsGroup.
    - Permissions: Read-only access to the logs bucket (enables auditing/log review).
 
----
-
-## How to Use
-
-1. **Deploy** the template via AWS CloudFormation (Console, CLI, or API).  
-2. **Customize** parameters (e.g., update the API key in SSM, modify bucket names if desired).  
-3. **Review Logs** in the dedicated Log S3 bucket for Lambda execution details and any troubleshooting needs.
 
 ---
 
 ## Security Highlights (Mapping to NIST CSF)
 
-- **Protect (PR)**:  
-  - Storing API keys securely in SSM Parameter Store; restricting IAM Role permissions (least privilege).
-- **Detect (DE)**:  
-  - Separating operational logs in a dedicated bucket provides a basis for future anomaly detection or auditing.
-- **Recover (RC)**:  
-  - Using CloudFormation (IaC) allows quick environment rebuilds in case of incidents or misconfigurations.
-- For Aditional info see NIST-Details.md  
+- **Protect (PR.PT-1)**:  
+  - “Audit/log records are determined, documented, implemented, and reviewed in accordance with policy.”
+  - LogBucket collects Lambda logs.
+  - Auditors are granted read-only access, enabling regular reviews and segregation of duties.
+- **Protect (PR.DS-1)**:  
+  - “Data-at-rest is protected.”
+  - Distinct data and log buckets;
+  - API keys stored securely in AWS SSM Parameter Store.
+  - Server-side encryption using S3 managed keys.
+  - **Protect (PR.AC-3)**:  
+  - “Remote access is managed.”
+  - Uses least-privilege IAM roles and user groups, restricting nonessential access paths (AuditorsGroup read-only policy).
 ---
 
-Enjoy automating your stock data collection with AWS!
-
----  
 
 **Author**: *Zach Almog with the kind help of various LLMs*  
 **License**: MIT or as appropriate.  

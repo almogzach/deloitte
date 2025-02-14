@@ -72,7 +72,7 @@ This repository contains a CloudFormation template that deploys a serverless sol
   - Distinct data and log buckets;
   - API keys stored securely in AWS SSM Parameter Store.
   - Server-side encryption using S3 managed keys.
-  - **Protect (PR.AC-3)**:  
+- **Protect (PR.AC-3)**:  
   - “Remote access is managed.”
   - Uses least-privilege IAM roles and user groups, restricting nonessential access paths (AuditorsGroup read-only policy).
 ---

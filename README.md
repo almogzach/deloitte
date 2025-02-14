@@ -19,7 +19,7 @@ This repository contains a CloudFormation template that deploys a serverless sol
 
 ---
 
-## Template Resources and Functions
+## Template Resources and Functions [cf_lambda_mag7.yaml]
 
 1. **StockDataBucket (S3)**  
    - Primary bucket for storing fetched stock data (JSON files).  

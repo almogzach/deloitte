@@ -15,7 +15,7 @@ This repository contains a CloudFormation template that deploys a serverless sol
 
 ![The Stack](diagram.png)
 
-## Resources and Functions Created by cf_lambda_mag7.yaml AWS Cloud Formation Template 
+## Resources Created by cf_lambda_mag7.yaml AWS Cloud Formation Template 
 
 1. **StockDataBucket (S3)**  
    - Primary bucket for storing fetched stock data (JSON files).  

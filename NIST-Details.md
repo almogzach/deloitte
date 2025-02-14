@@ -94,4 +94,5 @@ While this template doesn’t include a full intrusion detection solution, it do
 5. **Infrastructure as Code** *(Recover → RC.RP)*  
    - Rapid environment rebuilds or rollbacks are possible if a security event or misconfiguration occurs.
 
-For more details, consult the official **NIST CSF v1.1** documentation and your organization’s specific security policies.
+For more details, consult the official **[NIST CSF v1.1](NIST-CSF-v1.1.pdf)** documentation and your organization’s specific security policies.
+

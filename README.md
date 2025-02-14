@@ -11,11 +11,11 @@
 
 # AWS CloudFormation Stack Overview
 
-This repository contains a CloudFormation template that deploys a serverless solution for regularly fetching and storing stock prices. Below is a brief overview of the core resources and their functions.
+This repository contains a CloudFormation template that deploys a serverless solution for regularly fetching and storing stock prices. 
 
----
+![The Stack](diagram.png)
 
-## Template Resources and Functions [cf_lambda_mag7.yaml]
+## Template Resources and Functions Created by cf_lambda_mag7.yaml
 
 1. **StockDataBucket (S3)**  
    - Primary bucket for storing fetched stock data (JSON files).  
@@ -57,10 +57,9 @@ This repository contains a CloudFormation template that deploys a serverless sol
    - Permissions: Read-only access to the logs bucket (enables auditing/log review).
 
 
----
+
 
 ## Security Highlights (Mapping to NIST CSF)
-
 - **Protect (PR.PT-1)**:  
   - “Audit/log records are determined, documented, implemented, and reviewed in accordance with policy.”
   - LogBucket collects Lambda logs.

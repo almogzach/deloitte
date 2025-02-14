@@ -52,6 +52,14 @@ This repository contains a CloudFormation template that deploys a serverless sol
    - Grants CloudWatch Events the rights to invoke the Lambda function.  
    - Binds the scheduling mechanism to the actual Lambda execution.
 
+8. **AuditorsGroup (IAM Group)**  
+   - Provides read-only access to the logs bucket for auditing purposes.
+   - Policy:
+   - Allows s3:ListBucket and s3:GetObject actions on the logs bucket.
+9. **Auditor01 and Auditor02 (IAM Users)** 
+   - Users assigned to the AuditorsGroup.
+   - Permissions: Read-only access to the logs bucket (enables auditing/log review).
+
 ---
 
 ## How to Use

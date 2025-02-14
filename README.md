@@ -11,8 +11,6 @@
 </pre>
 </details>
 
-# Deloitte Architecht task 
-
 # AWS CloudFormation Stack Overview
 
 This repository contains a CloudFormation template that deploys a serverless solution for regularly fetching and storing stock prices. Below is a brief overview of the core resources and their functions.

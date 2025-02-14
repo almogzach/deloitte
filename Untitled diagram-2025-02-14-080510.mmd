@@ -1,0 +1,40 @@
+---
+config:
+  theme: forest
+---
+erDiagram
+    CLOUDWATCH_EVENT ||--o{ LAMBDA_FUNCTION : Triggers
+    LAMBDA_FUNCTION ||--|{ SSM_PARAMETER_STORE : Fetches_API_Key
+    LAMBDA_FUNCTION ||--|{ S3_STOCK_DATA_BUCKET : Writes_Stock_Data
+    LAMBDA_FUNCTION ||--|{ S3_LOG_BUCKET : Writes_Logs
+    IAM_ROLE ||--|{ LAMBDA_FUNCTION : AssumeRole
+    IAM_ROLE ||--o{ S3_STOCK_DATA_BUCKET : Access
+    IAM_ROLE ||--o{ S3_LOG_BUCKET : Limited_Write
+    AUDITORS_GROUP ||--o{ S3_LOG_BUCKET : Read_Only_Access
+    CLOUDWATCH_EVENT {
+        string Type
+        string Trigger_Method
+    }
+    LAMBDA_FUNCTION {
+        string Name
+        string Runtime
+    }
+    S3_STOCK_DATA_BUCKET {
+        string Name
+        int Retention_Days
+    }
+    S3_LOG_BUCKET {
+        string Name
+    }
+    SSM_PARAMETER_STORE {
+        string Name
+        bool Encrypted
+    }
+    IAM_ROLE {
+        string Name
+        bool Least_Privilege
+    }
+    AUDITORS_GROUP {
+        string Name
+        string Permissions
+    }

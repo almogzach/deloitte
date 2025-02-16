@@ -1,0 +1,114 @@
+---
+config:
+  layout: fixed
+---
+flowchart LR
+ subgraph subGraph0["ASG: Web Servers"]
+        AZ1_Web1("Web Server 1")
+        AZ1_Web2("Web Server 2")
+  end
+ subgraph subGraph1["Public Subnet (10.0.1.0/24)"]
+        subGraph0
+  end
+ subgraph AZ1_APIGW_Sub["API Gateway"]
+        AZ1_APIGW[/"API Gateway"/]
+  end
+ subgraph subGraph3["Private Subnet 1 (10.0.3.0/24)"]
+        AZ1_API1("API Server 1<br>AuthZ, Input Validation,<br>SSRF Protection")
+        AZ1_API2("API Server 2<br>AuthZ, Input Validation,<br>SSRF Protection")
+  end
+ subgraph AZ1_Cache_Sub["ElastiCache"]
+        AZ1_Cache[/"ElastiCache"/]
+  end
+ subgraph subGraph5["Private Subnet 2 (10.0.5.0/24)"]
+        AZ1_DB("SQL Server DB<br>Multi-AZ")
+  end
+ subgraph subGraph6["Availability Zone 1"]
+        subGraph1
+        AZ1_APIGW_Sub
+        subGraph3
+        AZ1_Cache_Sub
+        subGraph5
+  end
+ subgraph subGraph7["ASG: Web Servers"]
+        AZ2_Web1("Web Server 1")
+        AZ2_Web2("Web Server 2")
+  end
+ subgraph subGraph8["Public Subnet (10.0.2.0/24)"]
+        subGraph7
+  end
+ subgraph AZ2_APIGW_Sub["API Gateway"]
+        AZ2_APIGW[/"API Gateway"/]
+  end
+ subgraph subGraph10["Private Subnet 1 (10.0.4.0/24)"]
+        AZ2_API1("API Server 1<br>AuthZ, Input Validation,<br>SSRF Protection")
+        AZ2_API2("API Server 2<br>AuthZ, Input Validation,<br>SSRF Protection")
+  end
+ subgraph AZ2_Cache_Sub["ElastiCache"]
+        AZ2_Cache[/"ElastiCache"/]
+  end
+ subgraph subGraph12["Private Subnet 2 (10.0.6.0/24)"]
+        AZ2_DB("SQL Server DB<br>Multi-AZ")
+  end
+ subgraph subGraph13["Availability Zone 2"]
+        subGraph8
+        AZ2_APIGW_Sub
+        subGraph10
+        AZ2_Cache_Sub
+        subGraph12
+  end
+ subgraph subGraph14["VPC (10.0.0.0/16)"]
+        subGraph6
+        subGraph13
+  end
+ subgraph subGraph15["AWS Region (e.g., us-east-1)"]
+        subGraph14
+  end
+ subgraph Legend["Legend"]
+    direction LR
+        L1["Security Control:<br>Red dashed border"]
+        L2["Auto Scaling Group:<br>Nested subgraph"]
+        L3["API Gateway:<br>Enforces OWASP API Top-10"]
+  end
+    I("Internet Users") -- |HTTPS (443)| --> WAF("AWS WAF")
+    WAF -- |HTTPS (443)| --> LB("Load Balancer<br>ALB")
+    LB -- |HTTPS (443)| --> AZ1_Web1 & AZ1_Web2 & AZ2_Web1 & AZ2_Web2
+    AZ1_Web1 -- |HTTPS (443)| --> AZ1_APIGW
+    AZ1_Web2 -- |HTTPS (443)| --> AZ1_APIGW
+    AZ2_Web1 -- |HTTPS (443)| --> AZ2_APIGW
+    AZ2_Web2 -- |HTTPS (443)| --> AZ2_APIGW
+    AZ1_APIGW -- |HTTPS (443)| --> AZ1_API1 & AZ1_API2
+    AZ2_APIGW -- |HTTPS (443)| --> AZ2_API1 & AZ2_API2
+    AZ1_API1 -.-> AZ1_Cache
+    AZ1_API2 -.-> AZ1_Cache
+    AZ2_API1 -.-> AZ2_Cache
+    AZ2_API2 -.-> AZ2_Cache
+    AZ1_Cache -- |TCP (1433)| --> AZ1_DB
+    AZ2_Cache -- |TCP (1433)| --> AZ2_DB
+    AZ1_API1 -- |TCP (1433)| --> AZ1_DB
+    AZ1_API2 -- |TCP (1433)| --> AZ1_DB
+    AZ2_API1 -- |TCP (1433)| --> AZ2_DB
+    AZ2_API2 -- |TCP (1433)| --> AZ2_DB
+    AZ1_Web1 --- CW("CloudWatch &amp;<br> CloudTrail")
+    AZ1_Web2 --- CW
+    AZ1_APIGW --- CW
+    AZ1_API1 --- CW
+    AZ1_API2 --- CW
+    AZ1_Cache --- CW
+    AZ1_DB --- CW
+    AZ2_Web1 --- CW
+    AZ2_Web2 --- CW
+    AZ2_APIGW --- CW
+    AZ2_API1 --- CW
+    AZ2_API2 --- CW
+    AZ2_Cache --- CW
+    AZ2_DB --- CW
+     AZ1_APIGW:::secControl
+     AZ2_APIGW:::secControl
+     WAF:::secControl
+    classDef secControl fill:#ffe0e0,stroke:#ff0000,stroke-width:2px,stroke-dasharray: 5,5
+    style AZ1_APIGW_Sub fill:none,stroke:none
+    style AZ1_Cache_Sub fill:none,stroke:none
+    style AZ2_APIGW_Sub fill:none,stroke:none
+    style AZ2_Cache_Sub fill:none,stroke:none
+    style Legend stroke:#000000

@@ -76,7 +76,7 @@ Resources:
     Properties:
       Name: "STOCK_API_KEY"
       Type: "String"
-      Value: "wlM510gWk184PYRzgYRBRBhixQs5jeNKDK13pOB3"
+      Value: "API KEY GOES HERE" # Typically, this would be deployed in a separate stack altogether.For the purpose of the POC, it was deployed together.
 
   # --- CloudWatch Event to Trigger Lambda Every 6 Hours ---
   StockDataEventRule:

@@ -13,9 +13,10 @@
 
 This repository contains a CloudFormation template that deploys a serverless solution for regularly fetching and storing stock prices. 
 
-![The Stack](diagram.png)
 
 ## Resources Created by cf_lambda_mag7.yaml AWS Cloud Formation Template 
+
+![The Stack](diagram.png)
 
 1. **StockDataBucket (S3)**  
    - Primary bucket for storing fetched stock data (JSON files).  
